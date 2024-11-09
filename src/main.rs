@@ -1,17 +1,25 @@
 use anyhow::Context;
-#[allow(unused_imports)]
-use flate2::read::{ZlibDecoder};
-use std::ffi::CStr;
-use std::io::BufReader;
-use std::io::BufRead;
-use std::env;
-use std::fmt::format;
-#[allow(unused_imports)]
-use std::fs;
-// use clap::Command; 
-use clap::{Parser,Subcommand};
 
-#[derive(Parser,Debug)]
+use clap::{Parser, Subcommand};
+
+use std::env;
+
+use flate2::read::ZlibDecoder;
+
+use std::ffi::CStr;
+
+use std::fs;
+
+use std::io;
+
+use std::io::prelude::*;
+
+use std::io::BufReader;
+
+/// Simple program to greet a person
+
+#[derive(Parser, Debug)]
+
 #[command(version,about,long_about=None)]
 struct Args{
 #[command(subcommand)]
@@ -48,17 +56,17 @@ fn main() {
         }
         Command::CatFile { pretty_print, object_hash }=>{
             
-            let mut f = std::fs::File::open(format!(".git/objects/{}/{}",&object_hash[..2], &object_hash[2..])).context("open in .git/objects").unwrap();
+            // anyhow::ensure!(pretty_print,"mode must be given without -p, we dont supprot mode ");
             
-            let z = ZlibDecoder::new(f);
-            let mut z = BufReader::new(z);
-            
-            let mut buf = Vec::new();
+        let content = fs::read(format!(".git/objects/{}/{}",&object_hash[..2], &object_hash[2..])).unwrap();
 
-            z.read_until(0, &mut buf).context("read header from .git/objects").unwrap();
-            
-            let header = CStr::from_bytes_with_nul(&buf).expect("there is exactly one null at the end.");
-            let header= header.to_str();
+        let mut z = ZlibDecoder::new(&content[..]);
+
+        let mut s = String::new();
+
+        z.read_to_string(&mut s).unwrap();
+
+        print!("{}", &s[8..]);
         }
     }
 
