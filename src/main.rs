@@ -68,7 +68,7 @@ fn main() {
 
         print!("{}", &s[8..]);
         }
-    }progress
+    }
 
 
 
